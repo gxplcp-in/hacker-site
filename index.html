@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MR SUJIT KUMAR // WHITE HAT HACKER</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #00ff41;
+    --cyan: #00e5ff;
+    --dim-green: #00aa2a;
+    --dark-green: #003a0f;
+    --bg: #020c02;
+    --bg2: #050f05;
+    --panel: #071207;
+    --border: #00ff4133;
+    --cyan-dim: #00b3cc;
+    --red: #ff003c;
+    --yellow: #ffe600;
+    --white: #c8ffcc;
+    --glow: 0 0 8px #00ff4180, 0 0 20px #00ff4140;
+    --glow-cyan: 0 0 8px #00e5ff80, 0 0 20px #00e5ff40;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--green);
+    font-family: 'Share Tech Mono', monospace;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* CUSTOM CURSOR */
+  .cursor {
+    position: fixed; width: 18px; height: 18px;
+    border: 2px solid var(--green); border-radius: 50%;
+    pointer-events: none; z-index: 99999;
+    transform: translate(-50%, -50%);
+    transition: width 0.15s, height 0.15s, border-color 0.15s;
+    box-shadow: var(--glow);
+  }
+  .cursor-dot {
+    position: fixed; width: 4px; height: 4px;
+    background: var(--green); border-radius: 50%;
+    pointer-events: none; z-index: 99999;
+    transform: translate(-50%, -50%);
+  }
+
+  /* MATRIX RAIN CANVAS */
+  #matrix-bg {
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    opacity: 0.07; z-index: 0; pointer-events: none;
+  }
+
+  /* SCANLINES OVERLAY */
+  body::after {
+    content: '';
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 2px,
+      rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px
+    );
+    pointer-events: none; z-index: 1;
+  }
+
+  /* NOISE TEXTURE */
+  body::before {
+    content: '';
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    opacity: 0.4; pointer-events: none; z-index: 1;
+  }
+
+  /* LAYOUT */
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 2; }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    background: rgba(2,12,2,0.92);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(10px);
+    z-index: 100; padding: 0 32px;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 56px;
+  }
+  .nav-logo {
+    font-family: 'Orbitron', monospace; font-size: 1rem; font-weight: 900;
+    color: var(--cyan); letter-spacing: 0.15em;
+    text-shadow: var(--glow-cyan);
+  }
+  .nav-logo span { color: var(--green); }
+  .nav-links { display: flex; gap: 28px; }
+  .nav-links a {
+    color: var(--dim-green); text-decoration: none; font-size: 0.78rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    transition: color 0.2s, text-shadow 0.2s;
+  }
+  .nav-links a:hover { color: var(--green); text-shadow: var(--glow); }
+  .nav-status {
+    font-size: 0.72rem; color: var(--dim-green);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .status-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--green); box-shadow: var(--glow);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.8)} }
+
+  /* HERO */
+  #hero {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    padding-top: 56px; text-align: center; position: relative;
+  }
+  .hero-content { position: relative; }
+  .hero-badge {
+    display: inline-block; font-size: 0.7rem; letter-spacing: 0.2em;
+    color: var(--cyan); border: 1px solid var(--cyan);
+    padding: 4px 16px; margin-bottom: 24px;
+    text-transform: uppercase; animation: fadeIn 1s ease;
+    box-shadow: var(--glow-cyan);
+  }
+  .hero-title {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(2.2rem, 6vw, 4.8rem);
+    font-weight: 900; line-height: 1.1;
+    color: var(--green);
+    text-shadow: 0 0 30px #00ff4180, 0 0 60px #00ff4140, 0 0 100px #00ff4120;
+    letter-spacing: 0.05em;
+    animation: glitchHero 6s infinite;
+  }
+  @keyframes glitchHero {
+    0%,94%,100% { clip-path: none; transform: none; }
+    95% { clip-path: inset(20% 0 60% 0); transform: translate(-3px, 0); }
+    96% { clip-path: inset(60% 0 10% 0); transform: translate(3px, 0); }
+    97% { clip-path: none; transform: none; }
+  }
+  .hero-sub {
+    font-family: 'VT323', monospace; font-size: 1.6rem;
+    color: var(--cyan); margin-top: 12px; letter-spacing: 0.1em;
+    animation: fadeIn 1.5s ease;
+  }
+  .typewriter-wrap { margin-top: 28px; font-size: 0.9rem; color: var(--dim-green); min-height: 24px; }
+  #typewriter { color: var(--green); }
+  .blink { animation: blink 1s infinite; }
+  @keyframes blink { 0%,49%{opacity:1} 50%,100%{opacity:0} }
+
+  .hero-stats {
+    display: flex; gap: 32px; justify-content: center; margin-top: 40px;
+    flex-wrap: wrap;
+  }
+  .stat-box {
+    border: 1px solid var(--border); padding: 14px 24px; text-align: center;
+    background: rgba(0,255,65,0.03);
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  .stat-box:hover { border-color: var(--green); box-shadow: var(--glow); }
+  .stat-num { font-family: 'Orbitron', monospace; font-size: 1.8rem; color: var(--cyan); }
+  .stat-label { font-size: 0.68rem; color: var(--dim-green); letter-spacing: 0.1em; margin-top: 4px; text-transform: uppercase; }
+
+  .scroll-cta {
+    margin-top: 50px; font-size: 0.72rem; color: var(--dim-green);
+    letter-spacing: 0.15em; animation: bounce 2s infinite;
+  }
+  @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(6px)} }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
+
+  /* SECTIONS */
+  section { padding: 80px 0; }
+  .section-header { margin-bottom: 48px; }
+  .section-tag { font-size: 0.68rem; color: var(--cyan); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 8px; }
+  .section-title {
+    font-family: 'Orbitron', monospace; font-size: 1.6rem; font-weight: 700;
+    color: var(--green); text-shadow: var(--glow);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .section-title::after {
+    content: ''; flex: 1; max-width: 200px; height: 1px;
+    background: linear-gradient(90deg, var(--green), transparent);
+  }
+
+  /* TERMINAL PANELS */
+  .terminal-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    position: relative; overflow: hidden;
+  }
+  .terminal-panel::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0;
+    height: 1px; background: linear-gradient(90deg, transparent, var(--green), transparent);
+  }
+  .terminal-header {
+    padding: 10px 16px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px; background: rgba(0,255,65,0.03);
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-r { background: #ff5f57; }
+  .dot-y { background: #febc2e; }
+  .dot-g { background: #28c840; }
+  .terminal-title { font-size: 0.72rem; color: var(--dim-green); margin-left: 8px; letter-spacing: 0.1em; }
+  .terminal-body { padding: 20px; }
+
+  /* TOOLS GRID */
+  .tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 24px; }
+
+  /* TOOL INPUT STYLES */
+  .tool-label { font-size: 0.72rem; color: var(--cyan); letter-spacing: 0.1em; margin-bottom: 8px; display: block; }
+  .tool-input {
+    width: 100%; background: rgba(0,0,0,0.5); border: 1px solid var(--border);
+    color: var(--green); font-family: 'Share Tech Mono', monospace; font-size: 0.88rem;
+    padding: 10px 14px; outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .tool-input:focus { border-color: var(--green); box-shadow: var(--glow); }
+  .tool-input::placeholder { color: #004a15; }
+  .tool-textarea { min-height: 80px; resize: vertical; }
+
+  .tool-btn {
+    background: transparent; border: 1px solid var(--green);
+    color: var(--green); font-family: 'Share Tech Mono', monospace; font-size: 0.82rem;
+    padding: 9px 20px; cursor: pointer; letter-spacing: 0.1em;
+    transition: background 0.2s, box-shadow 0.2s, color 0.2s;
+    text-transform: uppercase; margin-top: 12px; margin-right: 8px;
+  }
+  .tool-btn:hover { background: rgba(0,255,65,0.12); box-shadow: var(--glow); }
+  .tool-btn.cyan { border-color: var(--cyan); color: var(--cyan); }
+  .tool-btn.cyan:hover { background: rgba(0,229,255,0.1); box-shadow: var(--glow-cyan); }
+
+  .output-box {
+    margin-top: 14px; background: rgba(0,0,0,0.6); border: 1px solid #00ff4120;
+    padding: 12px 14px; font-size: 0.82rem; min-height: 44px; word-break: break-all;
+    color: var(--cyan); transition: border-color 0.3s;
+    position: relative;
+  }
+  .output-box.active { border-color: var(--cyan); box-shadow: var(--glow-cyan); }
+
+  /* PASSWORD STRENGTH */
+  .strength-bar-wrap { margin-top: 14px; }
+  .strength-bar-bg { height: 6px; background: #0a1f0a; border-radius: 3px; overflow: hidden; }
+  .strength-bar { height: 100%; width: 0; border-radius: 3px; transition: width 0.4s, background 0.4s; }
+  .strength-info { display: flex; justify-content: space-between; margin-top: 6px; font-size: 0.72rem; }
+  .strength-label { color: var(--dim-green); }
+  .strength-time { color: var(--cyan); }
+  .strength-checks { margin-top: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .check-item { font-size: 0.74rem; display: flex; align-items: center; gap: 6px; }
+  .check-icon { font-size: 0.9rem; }
+
+  /* HASH TABS */
+  .hash-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
+  .hash-tab {
+    padding: 6px 16px; font-size: 0.72rem; cursor: pointer;
+    border: 1px solid var(--border); color: var(--dim-green);
+    background: transparent; font-family: 'Share Tech Mono', monospace;
+    transition: all 0.2s; letter-spacing: 0.1em;
+  }
+  .hash-tab.active { border-color: var(--green); color: var(--green); background: rgba(0,255,65,0.08); }
+
+  /* COPY BTN */
+  .copy-btn {
+    position: absolute; top: 8px; right: 8px;
+    font-size: 0.65rem; color: var(--dim-green); cursor: pointer;
+    padding: 2px 8px; border: 1px solid var(--border);
+    background: transparent; font-family: 'Share Tech Mono', monospace;
+    transition: all 0.2s;
+  }
+  .copy-btn:hover { color: var(--green); border-color: var(--green); }
+
+  /* BINARY TABLE */
+  .binary-table { font-size: 0.72rem; margin-top: 12px; }
+  .binary-row { display: flex; padding: 4px 0; border-bottom: 1px solid #00ff410a; gap: 16px; }
+  .binary-char { color: var(--cyan); width: 20px; text-align: center; }
+  .binary-dec { color: var(--dim-green); width: 30px; }
+  .binary-hex { color: #ffaa00; width: 30px; }
+  .binary-val { color: var(--green); flex: 1; letter-spacing: 0.05em; }
+
+  /* RESOURCES */
+  .resources-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+  .resource-card {
+    border: 1px solid var(--border); padding: 20px;
+    background: var(--panel); transition: border-color 0.3s, box-shadow 0.3s;
+    position: relative; overflow: hidden;
+  }
+  .resource-card:hover { border-color: var(--cyan); box-shadow: var(--glow-cyan); }
+  .resource-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--cyan), transparent);
+    transform: scaleX(0); transform-origin: left; transition: transform 0.3s;
+  }
+  .resource-card:hover::before { transform: scaleX(1); }
+  .resource-icon { font-size: 1.4rem; margin-bottom: 10px; }
+  .resource-title { font-family: 'Orbitron', monospace; font-size: 0.85rem; color: var(--cyan); margin-bottom: 8px; }
+  .resource-desc { font-size: 0.78rem; color: var(--dim-green); line-height: 1.6; }
+  .resource-tag {
+    display: inline-block; margin-top: 10px; font-size: 0.65rem; padding: 2px 8px;
+    border: 1px solid var(--border); color: var(--dim-green); letter-spacing: 0.1em;
+  }
+
+  /* ABOUT SECTION */
+  .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
+  @media(max-width:700px) { .about-grid { grid-template-columns: 1fr; } }
+  .skill-row { margin-bottom: 16px; }
+  .skill-info { display: flex; justify-content: space-between; font-size: 0.76rem; margin-bottom: 6px; }
+  .skill-bar-bg { height: 4px; background: #0a1f0a; }
+  .skill-bar { height: 100%; background: linear-gradient(90deg, var(--cyan), var(--green)); width: 0; transition: width 1.5s ease; box-shadow: var(--glow); }
+
+  .about-text { font-size: 0.84rem; color: var(--white); line-height: 1.8; opacity: 0.8; }
+  .about-text p { margin-bottom: 14px; }
+
+  /* DISCLAIMER */
+  #disclaimer {
+    background: rgba(255,0,60,0.04); border: 1px solid rgba(255,0,60,0.3);
+    padding: 28px 32px; text-align: center; position: relative; overflow: hidden;
+  }
+  #disclaimer::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--red), transparent);
+  }
+  .disclaimer-title {
+    font-family: 'Orbitron', monospace; font-size: 0.9rem; color: var(--red);
+    letter-spacing: 0.2em; margin-bottom: 12px;
+    text-shadow: 0 0 20px rgba(255,0,60,0.5);
+  }
+  .disclaimer-text { font-size: 0.8rem; color: rgba(255,180,180,0.7); line-height: 1.7; max-width: 700px; margin: 0 auto; }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border); padding: 28px 32px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 0.72rem; color: var(--dim-green); flex-wrap: wrap; gap: 12px;
+  }
+  .footer-left { font-family: 'Orbitron', monospace; color: var(--green); font-size: 0.75rem; }
+  .footer-right a { color: var(--dim-green); text-decoration: none; margin-left: 18px; transition: color 0.2s; }
+  .footer-right a:hover { color: var(--cyan); }
+
+  /* SECTION DIVIDER */
+  .divider { height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); margin: 0; }
+
+  /* GLITCH TEXT */
+  .glitch {
+    position: relative;
+    animation: glitchText 4s infinite;
+  }
+  @keyframes glitchText {
+    0%,90%,100%{text-shadow:none}
+    91%{text-shadow:2px 0 var(--red),−2px 0 var(--cyan)}
+    92%{text-shadow:-2px 0 var(--red),2px 0 var(--cyan)}
+    93%{text-shadow:none}
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--dim-green); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--green); }
+
+  /* MOBILE NAV */
+  @media(max-width:600px){
+    .nav-links { display: none; }
+    .nav-status { display: none; }
+    .tools-grid { grid-template-columns: 1fr; }
+    .hero-stats { gap: 16px; }
+  }
+
+  /* ALERT */
+  .tool-alert {
+    position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+    background: var(--dark-green); border: 1px solid var(--green);
+    color: var(--green); padding: 12px 20px; font-size: 0.8rem;
+    box-shadow: var(--glow); transform: translateX(200px); opacity: 0;
+    transition: transform 0.3s, opacity 0.3s;
+  }
+  .tool-alert.show { transform: none; opacity: 1; }
+
+  .prompt { color: var(--cyan); }
+  .cmd-line { display: flex; gap: 8px; align-items: center; font-size: 0.82rem; padding: 4px 0; }
+</style>
+</head>
+<body>
+
+<canvas id="matrix-bg"></canvas>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="tool-alert" id="alert">✓ COPIED TO CLIPBOARD</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">[<span>SK</span>]// SUJIT KUMAR</div>
+  <div class="nav-links">
+    <a href="#tools">_TOOLS</a>
+    <a href="#resources">_RESOURCES</a>
+    <a href="#about">_ABOUT</a>
+    <a href="#disclaimer">_DISCLAIMER</a>
+  </div>
+  <div class="nav-status">
+    <div class="status-dot"></div>
+    <span>SYSTEM ONLINE</span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-badge">// WHITE HAT SECURITY RESEARCHER //</div>
+      <h1 class="hero-title glitch">MR SUJIT KUMAR</h1>
+      <div class="hero-sub">[ ETHICAL HACKER &amp; SECURITY ANALYST ]</div>
+      <div class="typewriter-wrap">
+        <span class="prompt">root@sujit:~$&nbsp;</span><span id="typewriter"></span><span class="blink">▋</span>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-box">
+          <div class="stat-num">CTF</div>
+          <div class="stat-label">Competitions</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">CVE</div>
+          <div class="stat-label">Researcher</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">01</div>
+          <div class="stat-label">Mission: Secure</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">100%</div>
+          <div class="stat-label">Ethical</div>
+        </div>
+      </div>
+      <div class="scroll-cta">▼ SCROLL TO EXPLORE ▼</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- TOOLS -->
+<section id="tools">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">// SECURITY UTILITIES //</div>
+      <div class="section-title">HACKING TOOLS</div>
+    </div>
+    <div class="tools-grid">
+
+      <!-- PASSWORD STRENGTH ANALYZER -->
+      <div class="terminal-panel">
+        <div class="terminal-header">
+          <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+          <span class="terminal-title">password_analyzer.sh</span>
+        </div>
+        <div class="terminal-body">
+          <div class="cmd-line"><span class="prompt">$</span> PASSWORD STRENGTH ANALYZER</div>
+          <br>
+          <label class="tool-label">ENTER PASSWORD TO ANALYZE:</label>
+          <input type="password" class="tool-input" id="passInput" placeholder="Enter password..." oninput="analyzePassword(this.value)">
+          <div class="strength-bar-wrap">
+            <div class="strength-bar-bg"><div class="strength-bar" id="strengthBar"></div></div>
+            <div class="strength-info">
+              <span class="strength-label">STRENGTH: <span id="strengthLabel">---</span></span>
+              <span class="strength-time">CRACK TIME: <span id="crackTime">---</span></span>
+            </div>
+          </div>
+          <div class="strength-checks" id="strengthChecks">
+            <div class="check-item"><span class="check-icon" id="chk-len">☐</span><span>8+ characters</span></div>
+            <div class="check-item"><span class="check-icon" id="chk-upper">☐</span><span>Uppercase</span></div>
+            <div class="check-item"><span class="check-icon" id="chk-lower">☐</span><span>Lowercase</span></div>
+            <div class="check-item"><span class="check-icon" id="chk-num">☐</span><span>Numbers</span></div>
+            <div class="check-item"><span class="check-icon" id="chk-sym">☐</span><span>Symbols</span></div>
+            <div class="check-item"><span class="check-icon" id="chk-16">☐</span><span>16+ chars</span></div>
+          </div>
+          <div class="output-box" id="passOutput" style="color:var(--dim-green);font-size:0.75rem">
+            Awaiting password input...
+          </div>
+        </div>
+      </div>
+
+      <!-- HASH GENERATOR -->
+      <div class="terminal-panel">
+        <div class="terminal-header">
+          <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+          <span class="terminal-title">hash_generator.sh</span>
+        </div>
+        <div class="terminal-body">
+          <div class="cmd-line"><span class="prompt">$</span> MD5 / SHA256 HASH GENERATOR</div>
+          <br>
+          <div class="hash-tabs">
+            <button class="hash-tab active" id="tab-md5" onclick="switchHashTab('md5')">MD5</button>
+            <button class="hash-tab" id="tab-sha256" onclick="switchHashTab('sha256')">SHA-256</button>
+            <button class="hash-tab" id="tab-sha1" onclick="switchHashTab('sha1')">SHA-1</button>
+          </div>
+          <label class="tool-label">INPUT TEXT:</label>
+          <textarea class="tool-input tool-textarea" id="hashInput" placeholder="Enter text to hash..."></textarea>
+          <button class="tool-btn" onclick="generateHash()">[ GENERATE HASH ]</button>
+          <button class="tool-btn cyan" onclick="clearHash()">[ CLEAR ]</button>
+          <div class="output-box" id="hashOutput" style="min-height:60px;padding-right:60px">
+            <button class="copy-btn" onclick="copyOutput('hashOutput')">COPY</button>
+            <span style="color:var(--dim-green)">Hash will appear here...</span>
+          </div>
+          <div style="margin-top:10px;font-size:0.72rem;color:var(--dim-green)">
+            NOTE: MD5/SHA-1 are NOT cryptographically secure. Use SHA-256+ for security.
+          </div>
+        </div>
+      </div>
+
+      <!-- TEXT TO BINARY -->
+      <div class="terminal-panel">
+        <div class="terminal-header">
+          <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+          <span class="terminal-title">binary_converter.sh</span>
+        </div>
+        <div class="terminal-body">
+          <div class="cmd-line"><span class="prompt">$</span> TEXT ↔ BINARY CONVERTER</div>
+          <br>
+          <label class="tool-label">INPUT TEXT:</label>
+          <textarea class="tool-input tool-textarea" id="binInput" placeholder="Enter text..."></textarea>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="tool-btn" onclick="textToBinary()">[ TEXT → BINARY ]</button>
+            <button class="tool-btn cyan" onclick="binaryToText()">[ BINARY → TEXT ]</button>
+            <button class="tool-btn" style="border-color:var(--yellow);color:var(--yellow)" onclick="textToHex()">[ TEXT → HEX ]</button>
+          </div>
+          <div class="output-box active" id="binOutput" style="padding-right:60px;font-size:0.78rem">
+            <button class="copy-btn" onclick="copyOutput('binOutput')">COPY</button>
+            <span style="color:var(--dim-green)">Output will appear here...</span>
+          </div>
+          <div id="binTable" style="max-height:180px;overflow-y:auto;margin-top:8px"></div>
+        </div>
+      </div>
+
+      <!-- PAYLOAD ENCODER -->
+      <div class="terminal-panel">
+        <div class="terminal-header">
+          <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+          <span class="terminal-title">encoder.sh</span>
+        </div>
+        <div class="terminal-body">
+          <div class="cmd-line"><span class="prompt">$</span> BASE64 / URL ENCODER</div>
+          <br>
+          <label class="tool-label">INPUT:</label>
+          <textarea class="tool-input tool-textarea" id="encInput" placeholder="Enter text to encode/decode..."></textarea>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="tool-btn" onclick="b64Encode()">[ B64 ENCODE ]</button>
+            <button class="tool-btn cyan" onclick="b64Decode()">[ B64 DECODE ]</button>
+            <button class="tool-btn" style="border-color:var(--yellow);color:var(--yellow)" onclick="urlEncode()">[ URL ENCODE ]</button>
+            <button class="tool-btn" style="border-color:#aaa;color:#aaa" onclick="urlDecode()">[ URL DECODE ]</button>
+          </div>
+          <div class="output-box active" id="encOutput" style="padding-right:60px;font-size:0.82rem">
+            <button class="copy-btn" onclick="copyOutput('encOutput')">COPY</button>
+            <span style="color:var(--dim-green)">Output will appear here...</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- RESOURCES -->
+<section id="resources">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">// KNOWLEDGE BASE //</div>
+      <div class="section-title">ETHICAL HACKING NOTES</div>
+    </div>
+    <div class="resources-grid">
+      <div class="resource-card">
+        <div class="resource-icon">🔍</div>
+        <div class="resource-title">RECONNAISSANCE</div>
+        <div class="resource-desc">Passive &amp; active recon techniques. OSINT gathering, footprinting, network scanning with Nmap, Shodan, and theHarvester. Information is power — know your target before engaging.</div>
+        <span class="resource-tag">PHASE 01</span>
+      </div>
+      <div class="resource-card">
+        <div class="resource-icon">🔓</div>
+        <div class="resource-title">VULNERABILITY ANALYSIS</div>
+        <div class="resource-desc">CVE databases, Nessus, OpenVAS scans. CVSS scoring, understanding zero-days vs. known exploits. Identifying attack surfaces in web apps, networks, and binaries.</div>
+        <span class="resource-tag">PHASE 02</span>
+      </div>
+      <div class="resource-card">
+        <div class="resource-icon">💥</div>
+        <div class="resource-title">EXPLOITATION</div>
+        <div class="resource-desc">Metasploit framework basics, payload types, privilege escalation techniques, buffer overflows, SQL injection, XSS, CSRF. Always with written authorization only.</div>
+        <span class="resource-tag">PHASE 03</span>
+      </div>
+      <div class="resource-card">
+        <div class="resource-icon">🌐</div>
+        <div class="resource-title">WEB APP SECURITY</div>
+        <div class="resource-desc">OWASP Top 10: Injection, Broken Auth, XSS, IDOR, Security Misconfiguration. Burp Suite, OWASP ZAP methodology. API security testing fundamentals.</div>
+        <span class="resource-tag">OWASP</span>
+      </div>
+      <div class="resource-card">
+        <div class="resource-icon">🔐</div>
+        <div class="resource-title">CRYPTOGRAPHY</div>
+        <div class="resource-desc">Symmetric vs asymmetric encryption, hash functions, PKI, TLS/SSL internals. Common crypto mistakes developers make and how attackers exploit weak implementations.</div>
+        <span class="resource-tag">CRYPTO</span>
+      </div>
+      <div class="resource-card">
+        <div class="resource-icon">🛡️</div>
+        <div class="resource-title">DEFENSE STRATEGIES</div>
+        <div class="resource-desc">Firewalls, IDS/IPS, WAF, SIEM systems. Threat modeling (STRIDE), incident response, forensic basics, log analysis, and building a blue team mindset.</div>
+        <span class="resource-tag">BLUE TEAM</span>
+      </div>
+      <div class="resource-card">
+        <div class="resource-icon">📡</div>
+        <div class="resource-title">NETWORK SECURITY</div>
+        <div class="resource-desc">TCP/IP deep dive, ARP spoofing, MITM attacks, Wireshark packet analysis, VPN/proxy internals, DNS hijacking, and network forensics fundamentals.</div>
+        <span class="resource-tag">NETWORKING</span>
+      </div>
+      <div class="resource-card">
+        <div class="resource-icon">🐧</div>
+        <div class="resource-title">LINUX ESSENTIALS</div>
+        <div class="resource-desc">Kali Linux toolkit, bash scripting for automation, file permissions &amp; SUID, cron job exploitation, kernel exploits basics, and essential commands every pentester must know.</div>
+        <span class="resource-tag">OS SECURITY</span>
+      </div>
+      <div class="resource-card">
+        <div class="resource-icon">📜</div>
+        <div class="resource-title">CERTIFICATIONS ROADMAP</div>
+        <div class="resource-desc">CEH → eJPT → OSCP pathway. CompTIA Security+, CySA+. Bug Bounty platforms: HackerOne, Bugcrowd. Building your portfolio through legal CTF competitions.</div>
+        <span class="resource-tag">CAREER</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">// OPERATOR PROFILE //</div>
+      <div class="section-title">ABOUT.TXT</div>
+    </div>
+    <div class="about-grid">
+      <div class="terminal-panel">
+        <div class="terminal-header">
+          <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+          <span class="terminal-title">whoami.sh</span>
+        </div>
+        <div class="terminal-body">
+          <div class="cmd-line"><span class="prompt">$</span><span style="color:var(--green)"> cat profile.txt</span></div>
+          <br>
+          <div class="about-text">
+            <p>NAME: <span style="color:var(--cyan)">Sujit Kumar</span><br>
+            ROLE: <span style="color:var(--cyan)">White Hat Security Researcher</span><br>
+            MISSION: <span style="color:var(--cyan)">Secure. Educate. Protect.</span></p>
+            <p>Passionate about cybersecurity and ethical hacking. Dedicated to uncovering vulnerabilities before malicious actors can exploit them — and to educating the next generation of defenders.</p>
+            <p>Every system has weaknesses. My job is to find them <span style="color:var(--green)">ethically</span> and help organizations patch them before bad actors strike.</p>
+          </div>
+          <br>
+          <div class="cmd-line"><span class="prompt">$</span><span style="color:var(--green)"> cat contact.txt</span></div>
+          <br>
+          <div style="font-size:0.8rem; color:var(--dim-green); line-height:1.9">
+            GitHub: <span style="color:var(--cyan)">github.com/sujit-kumar</span><br>
+            LinkedIn: <span style="color:var(--cyan)">/in/sujit-kumar</span><br>
+            Bug Bounty: <span style="color:var(--cyan)">HackerOne | Bugcrowd</span><br>
+            Location: <span style="color:var(--cyan)">India 🇮🇳</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="terminal-panel">
+        <div class="terminal-header">
+          <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+          <span class="terminal-title">skills.sh</span>
+        </div>
+        <div class="terminal-body">
+          <div class="cmd-line"><span class="prompt">$</span><span style="color:var(--green)"> ./list_skills.sh</span></div>
+          <br>
+          <div id="skills-container">
+            <div class="skill-row"><div class="skill-info"><span>WEB APP PENTESTING</span><span style="color:var(--cyan)">90%</span></div><div class="skill-bar-bg"><div class="skill-bar" data-width="90"></div></div></div>
+            <div class="skill-row"><div class="skill-info"><span>NETWORK SECURITY</span><span style="color:var(--cyan)">82%</span></div><div class="skill-bar-bg"><div class="skill-bar" data-width="82"></div></div></div>
+            <div class="skill-row"><div class="skill-info"><span>PYTHON / BASH SCRIPTING</span><span style="color:var(--cyan)">85%</span></div><div class="skill-bar-bg"><div class="skill-bar" data-width="85"></div></div></div>
+            <div class="skill-row"><div class="skill-info"><span>CRYPTOGRAPHY</span><span style="color:var(--cyan)">75%</span></div><div class="skill-bar-bg"><div class="skill-bar" data-width="75"></div></div></div>
+            <div class="skill-row"><div class="skill-info"><span>SOCIAL ENGINEERING DEFENSE</span><span style="color:var(--cyan)">78%</span></div><div class="skill-bar-bg"><div class="skill-bar" data-width="78"></div></div></div>
+            <div class="skill-row"><div class="skill-info"><span>MALWARE ANALYSIS</span><span style="color:var(--cyan)">68%</span></div><div class="skill-bar-bg"><div class="skill-bar" data-width="68"></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- DISCLAIMER -->
+<section id="disclaimer">
+  <div class="container">
+    <div id="disclaimer" class="terminal-panel">
+      <div class="terminal-header">
+        <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+        <span class="terminal-title">DISCLAIMER.TXT — READ CAREFULLY</span>
+      </div>
+      <div class="terminal-body" style="text-align:center;padding:32px">
+        <div class="disclaimer-title">⚠ EDUCATIONAL PURPOSES ONLY ⚠</div>
+        <div class="disclaimer-text">
+          All tools, techniques, and resources on this website are provided strictly for 
+          <span style="color:var(--red)">educational and ethical security research purposes</span>. 
+          The tools provided are for learning about cybersecurity concepts in authorized, legal environments only.
+          <br><br>
+          Any unauthorized access to systems, networks, or data is <span style="color:var(--red)">illegal</span> and 
+          a violation of laws including India's IT Act 2000, CFAA (US), and equivalent legislation worldwide.
+          <br><br>
+          Always obtain <span style="color:var(--green)">written permission</span> before conducting any security testing. 
+          This site assumes no liability for misuse of any information or tools presented herein.
+          Use knowledge responsibly. Be ethical. <span style="color:var(--cyan)">Be the good guy.</span>
+        </div>
+        <div style="margin-top:20px;font-size:0.7rem;color:var(--dim-green);letter-spacing:0.15em">
+          [ HACK ETHICALLY. DISCLOSE RESPONSIBLY. DEFEND PASSIONATELY. ]
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-left">MR SUJIT KUMAR // WHITE HAT HACKER</div>
+  <div style="font-size:0.72rem;color:var(--dim-green)">
+    <span style="color:var(--green)">root@sujit:~$</span> echo "Stay ethical, stay legal" &amp;&amp; exit 0
+  </div>
+  <div class="footer-right">
+    <a href="#tools">Tools</a>
+    <a href="#resources">Resources</a>
+    <a href="#about">About</a>
+    <a href="#disclaimer">Disclaimer</a>
+  </div>
+</footer>
+
+<script>
+// ========== MATRIX RAIN ==========
+const canvas = document.getElementById('matrix-bg');
+const ctx = canvas.getContext('2d');
+let cols, drops;
+function initMatrix() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  cols = Math.floor(canvas.width / 16);
+  drops = Array(cols).fill(1);
+}
+function drawMatrix() {
+  ctx.fillStyle = 'rgba(2,12,2,0.05)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#00ff41';
+  ctx.font = '14px Share Tech Mono';
+  drops.forEach((y, i) => {
+    const char = String.fromCharCode(0x30A0 + Math.random() * 96);
+    ctx.fillText(char, i * 16, y * 16);
+    if (y * 16 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+    drops[i]++;
+  });
+}
+initMatrix();
+setInterval(drawMatrix, 50);
+window.addEventListener('resize', initMatrix);
+
+// ========== CURSOR ==========
+const cursor = document.getElementById('cursor');
+const cursorDot = document.getElementById('cursorDot');
+document.addEventListener('mousemove', e => {
+  cursor.style.left = e.clientX + 'px';
+  cursor.style.top = e.clientY + 'px';
+  cursorDot.style.left = e.clientX + 'px';
+  cursorDot.style.top = e.clientY + 'px';
+});
+
+// ========== TYPEWRITER ==========
+const lines = [
+  'whoami → ethical_hacker',
+  'nmap -sV target.com',
+  'cat /etc/shadow | hashcat',
+  'python3 exploit.py --target 192.168.1.1',
+  'burpsuite --proxy=8080',
+  'hydra -l admin -P wordlist.txt ssh://target',
+  'Knowledge is the best firewall.',
+  'Hack the planet. Ethically.',
+];
+let li = 0, ci = 0, deleting = false;
+const tw = document.getElementById('typewriter');
+function type() {
+  const current = lines[li];
+  if (!deleting) {
+    tw.textContent = current.substring(0, ci + 1);
+    ci++;
+    if (ci === current.length) { deleting = true; setTimeout(type, 2000); return; }
+  } else {
+    tw.textContent = current.substring(0, ci - 1);
+    ci--;
+    if (ci === 0) { deleting = false; li = (li + 1) % lines.length; }
+  }
+  setTimeout(type, deleting ? 40 : 75);
+}
+type();
+
+// ========== SKILL BARS OBSERVER ==========
+const skillBars = document.querySelectorAll('.skill-bar');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.querySelectorAll('.skill-bar').forEach(b => {
+        b.style.width = b.dataset.width + '%';
+      });
+    }
+  });
+}, { threshold: 0.3 });
+const skillsEl = document.getElementById('skills-container');
+if (skillsEl) observer.observe(skillsEl);
+
+// ========== ALERT ==========
+function showAlert(msg) {
+  const a = document.getElementById('alert');
+  a.textContent = msg;
+  a.classList.add('show');
+  setTimeout(() => a.classList.remove('show'), 2000);
+}
+
+function copyOutput(id) {
+  const el = document.getElementById(id);
+  const text = el.innerText.replace('COPY','').trim();
+  navigator.clipboard.writeText(text).then(() => showAlert('✓ COPIED TO CLIPBOARD'));
+}
+
+// ========== PASSWORD STRENGTH ==========
+function analyzePassword(pass) {
+  const checks = {
+    len: pass.length >= 8,
+    upper: /[A-Z]/.test(pass),
+    lower: /[a-z]/.test(pass),
+    num: /[0-9]/.test(pass),
+    sym: /[^A-Za-z0-9]/.test(pass),
+    len16: pass.length >= 16
+  };
+  const keys = Object.keys(checks);
+  keys.forEach(k => {
+    const el = document.getElementById('chk-' + k);
+    if (el) el.textContent = checks[k] ? '✔' : '☐';
+    if (el) el.style.color = checks[k] ? 'var(--green)' : 'var(--dim-green)';
+  });
+  const score = Object.values(checks).filter(Boolean).length;
+  const bar = document.getElementById('strengthBar');
+  const label = document.getElementById('strengthLabel');
+  const time = document.getElementById('crackTime');
+  const out = document.getElementById('passOutput');
+  if (!pass) { bar.style.width='0%'; label.textContent='---'; time.textContent='---'; out.innerHTML='<span style="color:var(--dim-green)">Awaiting input...</span>'; return; }
+  let pct, col, lbl, ct, info;
+  if (score <= 1) { pct='8%'; col='#ff003c'; lbl='CRITICAL'; ct='< 1 second'; info='This password is trivially crackable. Do not use.'; }
+  else if (score === 2) { pct='22%'; col='#ff6600'; lbl='WEAK'; ct='< 1 hour'; info='Very weak. Add more character types.'; }
+  else if (score === 3) { pct='45%'; col='#ffe600'; lbl='MODERATE'; ct='~1 day'; info='Moderate strength. Consider adding symbols and length.'; }
+  else if (score === 4) { pct='68%'; col='#90ee00'; lbl='STRONG'; ct='~10 years'; info='Good password. Length above 16 chars would make it excellent.'; }
+  else if (score === 5) { pct='84%'; col='#00ee55'; lbl='VERY STRONG'; ct='~1000 years'; info='Very strong password. Excellent security.'; }
+  else { pct='100%'; col='#00ff41'; lbl='EXCELLENT'; ct='>1M years'; info='Excellent! This password would take millions of years to brute-force.'; }
+  bar.style.width = pct;
+  bar.style.background = `linear-gradient(90deg, ${col}, #00ff41)`;
+  label.textContent = lbl; label.style.color = col;
+  time.textContent = ct;
+  out.innerHTML = `<span style="color:${col}">[${lbl}]</span> <span style="color:var(--white)">${info}</span><br><span style="color:var(--dim-green)">ENTROPY: ~${Math.round(pass.length * Math.log2(26 + (checks.num?10:0) + (checks.sym?32:0) + (checks.upper?26:0)))} bits | LENGTH: ${pass.length} chars</span>`;
+}
+
+// ========== HASH GENERATOR ==========
+let currentHash = 'md5';
+function switchHashTab(type) {
+  currentHash = type;
+  document.querySelectorAll('.hash-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + type).classList.add('active');
+}
+
+async function sha256(msg) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+async function sha1(msg) {
+  const buf = await crypto.subtle.digest('SHA-1', new TextEncoder().encode(msg));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+function md5(str) {
+  function safeAdd(x,y){var lsw=(x&0xFFFF)+(y&0xFFFF);var msw=(x>>16)+(y>>16)+(lsw>>16);return(msw<<16)|(lsw&0xFFFF);}
+  function bitRotateLeft(num,cnt){return(num<<cnt)|(num>>>(32-cnt));}
+  function md5cmn(q,a,b,x,s,t){return safeAdd(bitRotateLeft(safeAdd(safeAdd(a,q),safeAdd(x,t)),s),b);}
+  function md5ff(a,b,c,d,x,s,t){return md5cmn((b&c)|((~b)&d),a,b,x,s,t);}
+  function md5gg(a,b,c,d,x,s,t){return md5cmn((b&d)|(c&(~d)),a,b,x,s,t);}
+  function md5hh(a,b,c,d,x,s,t){return md5cmn(b^c^d,a,b,x,s,t);}
+  function md5ii(a,b,c,d,x,s,t){return md5cmn(c^(b|(~d)),a,b,x,s,t);}
+  var i,x,l,s,t,n,m;
+  str=unescape(encodeURIComponent(str));
+  var nBytes=str.length;
+  var M=[];
+  for(i=0;i<nBytes;i++){M[i>>2]|=str.charCodeAt(i)<<((i%4)*8);}
+  M[nBytes>>2]|=0x80<<((nBytes%4)*8);
+  M[(((nBytes+8)>>6)<<4)+14]=nBytes*8;
+  var w=M.length+2;
+  if(w%16!==0)w+=16-(w%16);
+  for(i=M.length;i<w;i++)M[i]=0;
+  var a=0x67452301,b=0xEFCDAB89,c=0x98BADCFE,d=0x10325476;
+  for(i=0;i<w;i+=16){
+    var aa=a,bb=b,cc=c,dd=d;
+    a=md5ff(a,b,c,d,M[i],7,-680876936);d=md5ff(d,a,b,c,M[i+1],12,-389564586);c=md5ff(c,d,a,b,M[i+2],17,606105819);b=md5ff(b,c,d,a,M[i+3],22,-1044525330);
+    a=md5ff(a,b,c,d,M[i+4],7,-176418897);d=md5ff(d,a,b,c,M[i+5],12,1200080426);c=md5ff(c,d,a,b,M[i+6],17,-1473231341);b=md5ff(b,c,d,a,M[i+7],22,-45705983);
+    a=md5ff(a,b,c,d,M[i+8],7,1770035416);d=md5ff(d,a,b,c,M[i+9],12,-1958414417);c=md5ff(c,d,a,b,M[i+10],17,-42063);b=md5ff(b,c,d,a,M[i+11],22,-1990404162);
+    a=md5ff(a,b,c,d,M[i+12],7,1804603682);d=md5ff(d,a,b,c,M[i+13],12,-40341101);c=md5ff(c,d,a,b,M[i+14],17,-1502002290);b=md5ff(b,c,d,a,M[i+15],22,1236535329);
+    a=md5gg(a,b,c,d,M[i+1],5,-165796510);d=md5gg(d,a,b,c,M[i+6],9,-1069501632);c=md5gg(c,d,a,b,M[i+11],14,643717713);b=md5gg(b,c,d,a,M[i],20,-373897302);
+    a=md5gg(a,b,c,d,M[i+5],5,-701558691);d=md5gg(d,a,b,c,M[i+10],9,38016083);c=md5gg(c,d,a,b,M[i+15],14,-660478335);b=md5gg(b,c,d,a,M[i+4],20,-405537848);
+    a=md5gg(a,b,c,d,M[i+9],5,568446438);d=md5gg(d,a,b,c,M[i+14],9,-1019803690);c=md5gg(c,d,a,b,M[i+3],14,-187363961);b=md5gg(b,c,d,a,M[i+8],20,1163531501);
+    a=md5gg(a,b,c,d,M[i+13],5,-1444681467);d=md5gg(d,a,b,c,M[i+2],9,-51403784);c=md5gg(c,d,a,b,M[i+7],14,1735328473);b=md5gg(b,c,d,a,M[i+12],20,-1926607734);
+    a=md5hh(a,b,c,d,M[i+5],4,-378558);d=md5hh(d,a,b,c,M[i+8],11,-2022574463);c=md5hh(c,d,a,b,M[i+11],16,1839030562);b=md5hh(b,c,d,a,M[i+14],23,-35309556);
+    a=md5hh(a,b,c,d,M[i+1],4,-1530992060);d=md5hh(d,a,b,c,M[i+4],11,1272893353);c=md5hh(c,d,a,b,M[i+7],16,-155497632);b=md5hh(b,c,d,a,M[i+10],23,-1094730640);
+    a=md5hh(a,b,c,d,M[i+13],4,681279174);d=md5hh(d,a,b,c,M[i],11,-358537222);c=md5hh(c,d,a,b,M[i+3],16,-722521979);b=md5hh(b,c,d,a,M[i+6],23,76029189);
+    a=md5hh(a,b,c,d,M[i+9],4,-640364487);d=md5hh(d,a,b,c,M[i+12],11,-421815835);c=md5hh(c,d,a,b,M[i+15],16,530742520);b=md5hh(b,c,d,a,M[i+2],23,-995338651);
+    a=md5ii(a,b,c,d,M[i],6,-198630844);d=md5ii(d,a,b,c,M[i+7],10,1126891415);c=md5ii(c,d,a,b,M[i+14],15,-1416354905);b=md5ii(b,c,d,a,M[i+5],21,-57434055);
+    a=md5ii(a,b,c,d,M[i+12],6,1700485571);d=md5ii(d,a,b,c,M[i+3],10,-1894986606);c=md5ii(c,d,a,b,M[i+10],15,-1051523);b=md5ii(b,c,d,a,M[i+1],21,-2054922799);
+    a=md5ii(a,b,c,d,M[i+8],6,1873313359);d=md5ii(d,a,b,c,M[i+15],10,-30611744);c=md5ii(c,d,a,b,M[i+6],15,-1560198380);b=md5ii(b,c,d,a,M[i+13],21,1309151649);
+    a=md5ii(a,b,c,d,M[i+4],6,-145523070);d=md5ii(d,a,b,c,M[i+11],10,-1120210379);c=md5ii(c,d,a,b,M[i+2],15,718787259);b=md5ii(b,c,d,a,M[i+9],21,-343485551);
+    a=safeAdd(a,aa);b=safeAdd(b,bb);c=safeAdd(c,cc);d=safeAdd(d,dd);
+  }
+  var result='';
+  [a,b,c,d].forEach(val=>{
+    for(var j=0;j<4;j++)result+=('0'+((val>>(j*8))&0xFF).toString(16)).slice(-2);
+  });
+  return result;
+}
+
+async function generateHash() {
+  const text = document.getElementById('hashInput').value;
+  if (!text) { document.getElementById('hashOutput').innerHTML = '<span style="color:var(--red)">ERROR: No input provided.</span>'; return; }
+  const out = document.getElementById('hashOutput');
+  out.innerHTML = '<span style="color:var(--dim-green)">Computing...</span>';
+  let hash;
+  try {
+    if (currentHash === 'md5') hash = md5(text);
+    else if (currentHash === 'sha256') hash = await sha256(text);
+    else hash = await sha1(text);
+  } catch(e) { hash = 'Error computing hash'; }
+  out.innerHTML = `<button class="copy-btn" onclick="copyOutput('hashOutput')">COPY</button><span style="color:var(--dim-green);font-size:0.7rem">${currentHash.toUpperCase()} HASH:</span><br><span style="color:var(--green);font-size:0.78rem;word-break:break-all">${hash}</span><br><span style="color:var(--dim-green);font-size:0.68rem">INPUT: "${text.substring(0,40)}${text.length>40?'...':''}" | BITS: ${(currentHash==='md5'?128:currentHash==='sha1'?160:256)}</span>`;
+  out.classList.add('active');
+}
+
+function clearHash() {
+  document.getElementById('hashInput').value = '';
+  document.getElementById('hashOutput').innerHTML = '<button class="copy-btn" onclick="copyOutput(\'hashOutput\')">COPY</button><span style="color:var(--dim-green)">Hash will appear here...</span>';
+}
+
+// ========== BINARY CONVERTER ==========
+function textToBinary() {
+  const text = document.getElementById('binInput').value;
+  if (!text) return;
+  const binary = text.split('').map(c => c.charCodeAt(0).toString(2).padStart(8,'0')).join(' ');
+  document.getElementById('binOutput').innerHTML = `<button class="copy-btn" onclick="copyOutput('binOutput')">COPY</button>${binary}`;
+  const table = document.getElementById('binTable');
+  if (text.length <= 30) {
+    table.innerHTML = '<div class="binary-table"><div class="binary-row" style="color:var(--cyan);font-weight:bold"><span class="binary-char">CHR</span><span class="binary-dec">DEC</span><span class="binary-hex">HEX</span><span class="binary-val">BINARY</span></div>'
+      + text.split('').map(c => `<div class="binary-row"><span class="binary-char">${c==' '?'SPC':c}</span><span class="binary-dec">${c.charCodeAt(0)}</span><span class="binary-hex">${c.charCodeAt(0).toString(16).toUpperCase()}</span><span class="binary-val">${c.charCodeAt(0).toString(2).padStart(8,'0')}</span></div>`).join('') + '</div>';
+  } else { table.innerHTML = ''; }
+}
+
+function binaryToText() {
+  const input = document.getElementById('binInput').value.trim().replace(/\s+/g,' ');
+  try {
+    const text = input.split(' ').map(b => String.fromCharCode(parseInt(b, 2))).join('');
+    document.getElementById('binOutput').innerHTML = `<button class="copy-btn" onclick="copyOutput('binOutput')">COPY</button><span style="color:var(--green)">${text}</span>`;
+  } catch { document.getElementById('binOutput').innerHTML = '<span style="color:var(--red)">Invalid binary input</span>'; }
+  document.getElementById('binTable').innerHTML = '';
+}
+
+function textToHex() {
+  const text = document.getElementById('binInput').value;
+  if (!text) return;
+  const hex = text.split('').map(c => c.charCodeAt(0).toString(16).toUpperCase().padStart(2,'0')).join(' ');
+  document.getElementById('binOutput').innerHTML = `<button class="copy-btn" onclick="copyOutput('binOutput')">COPY</button><span style="color:#ffaa00">${hex}</span>`;
+  document.getElementById('binTable').innerHTML = '';
+}
+
+// ========== BASE64 / URL ENCODER ==========
+function b64Encode() {
+  const v = document.getElementById('encInput').value;
+  document.getElementById('encOutput').innerHTML = `<button class="copy-btn" onclick="copyOutput('encOutput')">COPY</button><span style="color:var(--green)">${btoa(unescape(encodeURIComponent(v)))}</span>`;
+}
+function b64Decode() {
+  try {
+    const v = document.getElementById('encInput').value;
+    document.getElementById('encOutput').innerHTML = `<button class="copy-btn" onclick="copyOutput('encOutput')">COPY</button><span style="color:var(--cyan)">${decodeURIComponent(escape(atob(v)))}</span>`;
+  } catch { document.getElementById('encOutput').innerHTML = '<span style="color:var(--red)">Invalid Base64 input.</span>'; }
+}
+function urlEncode() {
+  const v = document.getElementById('encInput').value;
+  document.getElementById('encOutput').innerHTML = `<button class="copy-btn" onclick="copyOutput('encOutput')">COPY</button><span style="color:#ffaa00">${encodeURIComponent(v)}</span>`;
+}
+function urlDecode() {
+  try {
+    const v = document.getElementById('encInput').value;
+    document.getElementById('encOutput').innerHTML = `<button class="copy-btn" onclick="copyOutput('encOutput')">COPY</button><span style="color:var(--white)">${decodeURIComponent(v)}</span>`;
+  } catch { document.getElementById('encOutput').innerHTML = '<span style="color:var(--red)">Invalid URL-encoded input.</span>'; }
+}
+</script>
+</body>
+</html>
